@@ -1,0 +1,53 @@
+---
+title: "rank_abundance_curve"
+author: "lrubinat"
+date: "27 novembre 2016"
+output: html_document
+---
+
+```{r libraries, echo=F}
+library(data.table)
+library(seqinr)
+library(reshape2)
+library(ggplot2)
+library(ggrepel)
+```
+
+Let's read the V9 region of TARA SAGs. 
+
+```{r read_V9_from_SAGs, echo=F}
+setwd("~/Documents/2Q16/analyses/exploratory_figures/dominant_mixotrophs/")
+
+sag_18S<-fread("SAG_18S_sequences.csv")
+nrow(sag_18S) #903 SAGs
+
+primer1<-"TTGTACACACCGCCC"
+
+sag_18S[,V9:=grepl(primer1,Sequences)]
+sag_18S<-sag_18S[V9==T]
+sag_18S[,Sequences:=sub(paste("^.+",primer1,sep=""),"",Sequences)]
+sag_18S[,V9:=NULL]
+nrow(sag_18S) #868 SAGs
+head(sag_18S)
+
+write.fasta(sequences = as.list(sag_18S$Sequences), names=sag_18S$ID_seq,file.out = "sag_V9.fas")
+```
+
+A total amount of 868 SAGs (out of 903) contain the sequence of the forward primer 1389F for the V9 region (5’- TTGTACACACCGCCC -3’). None of the 903 SAGs contain the sequence of the reverse primer 1510R (5’- CCTTCYGCAGGTTCACCTAC -3’).
+
+Let's blast the obtained V9 sequences on Tara swarms. We'll select the hits showing a coverage >80% and a similarity =>97%. 
+
+```{r blast_SAGs-V9_on_swarms, echo=F}
+
+system("vsearch --usearch_global sag_V9.fas --maxrejects 0 --maxaccepts 0 --top_hits_only -db /home0/data/Tara/last/tara_ref.fas --blast6out output.txt --id 0.8")
+ 
+output<-fread("output.txt")
+output[,coverage:=V4/V10*100]
+output<-output[coverage>80]
+output<-output[,list(V1,V2,V3,V4,V10,coverage)]
+setnames(output,c("SAG_id","md5sum","identity","SAG_length","swarm_length","coverage"))
+output<-output[identity>=97]
+
+
+
+```
