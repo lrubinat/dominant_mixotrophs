@@ -11,6 +11,7 @@ library(seqinr)
 library(reshape2)
 library(ggplot2)
 library(ggrepel)
+library(plyr)
 ```
 
 Let's read the V9 region of TARA SAGs. 
@@ -66,9 +67,13 @@ data_abund<-data_abund[value>0]
 setkey(data_abund,variable)
 setkey(sple,sample)
 data_abund<-sple[data_abund]
+
+write.table(data_abund, "data_abund_table.txt", sep="\t")
 ```
 
-```{r figures, echo=F}
+All SAGs
+
+```{r fig_all, echo=F}
 temp<-data_abund[,sum(value),by=md5sum]
 setkey(temp,md5sum)
 setkey(output,md5sum)
@@ -79,9 +84,48 @@ temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 
 ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
-  
 
-temp<-data_abund[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
+length(which(temp$SAG == "yes")) #872
+length(which(temp$SAG == "no")) #92837
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+```{r read_SAGs_classification, echo=F}
+SAGs_classification<-read.table(file="SAGs_complete_IDs.txt", head=TRUE, fill=TRUE)
+
+SAGs_classification[1:5,]
+```
+
+SURFACE - Fraction 0.8-5
+
+```{r fig_piconano, echo=F}
+data_abund_SUR<-data_abund[depth=="SUR"]
+temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+temp<-join(temp, SAGs_classification)
+temp[1:12,]
+
+ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+
+length(which(temp$SAG == "yes")) #817
+length(which(temp$SAG == "no")) #38465
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+Fraction 5-20um
+
+```{r fig_nano, echo=F}
+temp<-data_abund[fraction=="5-20",sum(value),by=list(md5sum,fraction)]
 setkey(temp,md5sum)
 setkey(output,md5sum)
 temp<-output[temp,allow.cartesian=T]
@@ -92,4 +136,51 @@ temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 
 ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
 
+length(which(temp$SAG == "yes")) #681
+length(which(temp$SAG == "no")) #28134
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+Fraction 20-180um
+
+```{r fig_micro, echo=F}
+temp<-data_abund[fraction=="20-180",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+
+ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+
+length(which(temp$SAG == "yes")) #678
+length(which(temp$SAG == "no")) #24988
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+Fraction 180-2000um
+
+```{r fig_meso, echo=F}
+temp<-data_abund[fraction=="180-2000",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+
+ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+
+length(which(temp$SAG == "yes")) #683
+length(which(temp$SAG == "no")) #24775
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
 ```
