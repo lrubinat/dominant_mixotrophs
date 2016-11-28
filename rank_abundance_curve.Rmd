@@ -2,10 +2,26 @@
 title: "rank_abundance_curve"
 author: "lrubinat"
 date: "27 novembre 2016"
-output: html_document
+output:  
+  html_document:
+    theme: united
+    toc: yes
+  pdf_document:
+    highlight: zenburn
+    toc: yes
 ---
 
-```{r libraries, echo=F}
+<!--- INITIALIZATION
+```{r, echo=FALSE}
+#error hook to kill knitr in case of errors
+library(knitr)
+knit_hooks$set(error = function(x, options) stop(x))
+opts_chunk$set(cache=TRUE, autodep=TRUE)
+```
+--->
+
+
+```{r libraries, echo=T, message=F}
 library(data.table)
 library(seqinr)
 library(reshape2)
@@ -68,7 +84,7 @@ setkey(data_abund,variable)
 setkey(sple,sample)
 data_abund<-sple[data_abund]
 
-write.table(data_abund, "data_abund_table.txt", sep="\t")
+#write.table(data_abund, "data_abund_table.txt", sep="\t")
 ```
 
 All SAGs
@@ -113,7 +129,20 @@ temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 temp<-join(temp, SAGs_classification)
 temp[1:12,]
 
-ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10()+
+  facet_wrap(~SAG,ncol=2)+
+  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>900000), aes(x=rank,y=V1,label=id_classif), size=2.5, force=2)
+
+# size=2, force=3, box.padding = unit(0.1,"lines"), point.padding = unit(0.02, "lines"))
+
+ggplot(data=subset(temp, temp$SAG=="yes" & temp$V1>100000),aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10()+
+  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>350000), aes(x=rank,y=V1,label=id_classif), size=2.5)
 
 length(which(temp$SAG == "yes")) #817
 length(which(temp$SAG == "no")) #38465
