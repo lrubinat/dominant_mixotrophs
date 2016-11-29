@@ -98,6 +98,8 @@ temp<-temp[order(V1,decreasing = T)]
 temp[,rank:=1:nrow(temp)]
 temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+temp<-join(temp, SAGs_classification)
+temp[1:12,]
 
 swarms_groups <- list(
   "no"="no SAG aligned",
@@ -115,13 +117,17 @@ ggplot(temp,aes(x=rank,y=V1))+
   scale_colour_discrete(name="swarms",
                     breaks=c("no", "yes"),
                     labels=c("no SAG aligned", "SAG(s) aligned"))+
-  theme(legend.position="bottom")
+  theme(legend.position="bottom")+
+  labs(title="[1] All swarms")
+
+ggsave("SAGs_abund_fig_all.png",height=6.75,width=9)
 
 length(which(temp$SAG == "yes")) #872
 length(which(temp$SAG == "no")) #92837
 
 SAGs_lt<-temp[temp$SAG =="yes"]
-SAGs_lt[1:50,]
+SAGs_lt[1:100,]
+write.table(SAGs_lt, "SAGs_abundance_tb_all.txt", sep="\t")
 ```
 
 ```{r read_SAGs_classification, echo=F}
@@ -149,9 +155,30 @@ ggplot(temp,aes(x=rank,y=V1))+
   geom_point(aes(colour=SAG))+
   scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
   scale_y_log10()+
-  facet_wrap(~SAG,ncol=2)+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  theme(legend.position="bottom")
   geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>900000), aes(x=rank,y=V1,label=id_classif), size=2.5, force=2)
 
+ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
+
+
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10()+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  theme(legend.position="bottom")
+ 
+ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
+
+
+  
 # size=2, force=3, box.padding = unit(0.1,"lines"), point.padding = unit(0.02, "lines"))
 
 ggplot(data=subset(temp, temp$SAG=="yes" & temp$V1>100000),aes(x=rank,y=V1))+
