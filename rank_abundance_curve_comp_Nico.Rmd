@@ -1,0 +1,266 @@
+---
+title: "SAGs' global abundance"
+date: "27.11.2016"
+output:  
+  html_document:
+    theme: united
+    toc: yes
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+---
+
+<!--- INITIALIZATION
+```{r, echo=FALSE}
+#error hook to kill knitr in case of errors
+library(knitr)
+knit_hooks$set(error = function(x, options) stop(x))
+opts_chunk$set(cache=TRUE, autodep=TRUE)
+```
+--->
+
+# 1) Overview
+
+```{r libraries, echo=F, message=F}
+library(data.table)
+library(seqinr)
+library(reshape2)
+library(ggplot2)
+library(ggrepel)
+library(plyr)
+library(DT)
+```
+
+
+```{r read_V9_from_SAGs, echo=F, message=F, results="hide"}
+setwd("~/Documents/2Q16/analyses/exploratory_figures/dominant_mixotrophs/")
+
+sag_18S<-fread("SAG_18S_sequences.csv")
+nrow(sag_18S) #903 SAGs
+
+primer1<-"TTGTACACACCGCCC"
+
+sag_18S[,V9:=grepl(primer1,Sequences)]
+sag_18S<-sag_18S[V9==T]
+sag_18S[,Sequences:=sub(paste("^.+",primer1,sep=""),"",Sequences)]
+sag_18S[,V9:=NULL]
+nrow(sag_18S) #868 SAGs
+head(sag_18S)
+
+write.fasta(sequences = as.list(sag_18S$Sequences), names=sag_18S$ID_seq,file.out = "sag_V9.fas")
+```
+
+A total amount of 868 SAGs (out of 903) contain the sequence of the forward primer 1389F for the V9 region (5’- TTGTACACACCGCCC -3’). None of the 903 SAGs contains the complete sequence of the reverse primer 1510R (5’- CCTTCYGCAGGTTCACCTAC -3’) - most of the 18S rDNA SAGs miss the last ~5 bp of the V9 region.
+
+We blasted the obtained V9 sequences on Tara swarms and we selected the hits showing a coverage >80% and a similarity =>97%. 
+
+```{r blast_SAGs-V9_on_swarms, echo=F, message=F, results="hide"}
+
+#system("vsearch --usearch_global sag_V9.fas --maxrejects 0 --maxaccepts 0 --top_hits_only -db /home0/data/Tara/last/tara_ref.fas --blast6out output.txt --id 0.8")
+ 
+output<-fread("output.txt")
+output[,coverage:=V4/V10*100]
+output<-output[coverage>80]
+output<-output[,list(V1,V2,V3,V4,V10,coverage)]
+setnames(output,c("SAG_id","md5sum","identity","SAG_length","swarm_length","coverage"))
+output<-output[identity>=97]
+```
+
+
+```{r samples_selection, echo=F, message=F, results="hide"}
+#global occurrence of swarms in Tara Oceans, BioMarKs and Tara Arctic.
+
+#selection of Tara samples.
+sple<-fread("sple.csv")
+sple<-sple[fraction%in%c("0.8-5","5-20","20-180","180-2000")&depth%in%c("SUR","DCM")&template=="DNA"]
+
+data_abund<-fread("data_abund_table.txt")
+
+#write.table(data_abund, "data_abund_table.txt", sep="\t",row.names=T)
+#write.table(data[,.SD,.SDcols=colnames(data)[!grepl("TV|TA|BV",colnames(data))]],"data_info_table.txt",sep="\t",row.names=T)
+#temp<-data[taxogroup=="Prasinophyceae Clade 7"]
+#rbind.fill.matrix(lapply(strsplit(temp$lineage,"\\|"),function(X) t(as.matrix(X))))
+```
+
+
+```{r read_SAGs_classification, echo=F, message=F, results="hide"}
+SAGs_classification<-read.table(file="SAGs_complete_IDs.txt", head=TRUE, fill=TRUE)
+
+SAGs_classification[1:50,]
+```
+
+
+```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
+temp<-data_abund[,sum(value),by=md5sum]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+temp<-join(temp, SAGs_classification)
+temp[1:12,]
+
+swarms_groups <- list(
+  "no"="no SAG aligned",
+  "yes"="SAG(s) aligned"
+)
+
+swarms_labeller <- function(variable,value){
+  return(swarms_groups[value])
+}
+
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_y_log10(name="abundance")+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  #theme(legend.position="bottom")+
+  labs(title="[Fig. 1] All swarms")
+
+ggsave("SAGs_abund_fig_all.png",height=6.75,width=9)
+```
+
+No. of swarms with SAG(s) aligned:
+
+```{r all_yes_length, echo=F}
+length(which(temp$SAG == "yes")) #872
+```
+
+No. of swarms with no SAG aligned:
+
+```{r all_no_length, echo=F}
+length(which(temp$SAG == "no")) #92837
+```
+
+```{r all_table, echo=F}
+SAGs_lt<-temp[temp$SAG =="yes"]
+
+datatable(SAGs_lt)
+#SAGs_lt[1:100,]
+#write.table(SAGs_lt, "SAGs_abundance_tb_all.txt", sep="\t")
+```
+
+SURFACE - Fraction 0.8-5
+
+```{r fig_piconano, echo=F}
+data_abund_SUR<-data_abund[depth=="SUR"]
+temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+temp<-join(temp, SAGs_classification)
+temp[1:12,]
+
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10()+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  theme(legend.position="bottom")
+  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>900000), aes(x=rank,y=V1,label=id_classif), size=2.5, force=2)
+
+ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
+
+
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10()+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  theme(legend.position="bottom")
+ 
+ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
+
+
+  
+# size=2, force=3, box.padding = unit(0.1,"lines"), point.padding = unit(0.02, "lines"))
+
+ggplot(data=subset(temp, temp$SAG=="yes" & temp$V1>100000),aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10()+
+  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>500000), aes(x=rank,y=V1,label=id_classif), size=2.5)
+
+length(which(temp$SAG == "yes")) #817
+length(which(temp$SAG == "no")) #38465
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+Fraction 5-20um
+
+```{r fig_nano, echo=F}
+temp<-data_abund[fraction=="5-20",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+
+ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+
+length(which(temp$SAG == "yes")) #681
+length(which(temp$SAG == "no")) #28134
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+Fraction 20-180um
+
+```{r fig_micro, echo=F}
+temp<-data_abund[fraction=="20-180",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+
+ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+
+length(which(temp$SAG == "yes")) #678
+length(which(temp$SAG == "no")) #24988
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```
+
+Fraction 180-2000um
+
+```{r fig_meso, echo=F}
+temp<-data_abund[fraction=="180-2000",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+
+ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+
+length(which(temp$SAG == "yes")) #683
+length(which(temp$SAG == "no")) #24775
+
+SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[1:50,]
+```

@@ -3,8 +3,11 @@ read_V9_from_SAGs	primer1	sag_18S
 blast_SAGs-V9_on_swarms	output
 samples_selection	data_abund	sple
 read_SAGs_classification	SAGs_classification
-fig_all	SAGs_lt	swarms_groups	swarms_labeller	temp	.Random.seed
+fig_all	swarms_groups	swarms_labeller	temp	.Random.seed
 fig_piconano	data_abund_SUR	SAGs_lt	temp
 fig_nano	SAGs_lt	temp
 fig_micro	SAGs_lt	temp
 fig_meso	SAGs_lt	temp
+all_yes_length	
+all_no_length	
+all_table	SAGs_lt	.rank_abundance_curve_comp_Nico_cache/html/all_table_83447c7bf7552e9ea56e1a8710179923_meta
