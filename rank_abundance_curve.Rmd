@@ -99,16 +99,23 @@ temp[,rank:=1:nrow(temp)]
 temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 
+swarms_groups <- list(
+  "no"="no SAG aligned",
+  "yes"="SAG(s) aligned"
+)
+
+swarms_labeller <- function(variable,value){
+  return(swarms_groups[value])
+}
+
 ggplot(temp,aes(x=rank,y=V1))+
   geom_point(aes(colour=SAG))+
   scale_y_log10(name="abundance")+
-  facet_wrap(~SAG,ncol=2)+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
   scale_colour_discrete(name="swarms",
                     breaks=c("no", "yes"),
                     labels=c("no SAG aligned", "SAG(s) aligned"))+
   theme(legend.position="bottom")
-
-ggsave("all_swarms.png",height=6.75,width=9)
 
 length(which(temp$SAG == "yes")) #872
 length(which(temp$SAG == "no")) #92837
