@@ -67,7 +67,7 @@ output<-output[identity>=97]
 ```
 
 
-```{r samples_selection, echo=F}
+```{r samples_selection, cache.lazy=F, echo=F}
 #global occurrence of swarms in Tara Oceans, BioMarKs and Tara Arctic.
 data<-fread("/home/lrubinat/Documents/2Q16/data/TARA_V9/globaldataset.otu.v20160830")
 head(data)
@@ -87,7 +87,7 @@ data_abund<-sple[data_abund]
 #write.table(data_abund, "data_abund_table.txt", sep="\t")
 ```
 
-All SAGs
+All swarms
 
 ```{r fig_all, echo=F}
 temp<-data_abund[,sum(value),by=md5sum]
@@ -99,7 +99,16 @@ temp[,rank:=1:nrow(temp)]
 temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 
-ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_y_log10(name="abundance")+
+  facet_wrap(~SAG,ncol=2)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  theme(legend.position="bottom")
+
+ggsave("all_swarms.png",height=6.75,width=9)
 
 length(which(temp$SAG == "yes")) #872
 length(which(temp$SAG == "no")) #92837
@@ -111,7 +120,7 @@ SAGs_lt[1:50,]
 ```{r read_SAGs_classification, echo=F}
 SAGs_classification<-read.table(file="SAGs_complete_IDs.txt", head=TRUE, fill=TRUE)
 
-SAGs_classification[1:5,]
+SAGs_classification[1:50,]
 ```
 
 SURFACE - Fraction 0.8-5
@@ -142,7 +151,7 @@ ggplot(data=subset(temp, temp$SAG=="yes" & temp$V1>100000),aes(x=rank,y=V1))+
   geom_point(aes(colour=SAG))+
   scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
   scale_y_log10()+
-  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>350000), aes(x=rank,y=V1,label=id_classif), size=2.5)
+  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>500000), aes(x=rank,y=V1,label=id_classif), size=2.5)
 
 length(which(temp$SAG == "yes")) #817
 length(which(temp$SAG == "no")) #38465
