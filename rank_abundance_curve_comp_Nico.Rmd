@@ -78,8 +78,7 @@ sple<-sple[fraction%in%c("0.8-5","5-20","20-180","180-2000")&depth%in%c("SUR","D
 data_abund<-fread("data_abund_table.txt")
 
 #write.table(data_abund, "data_abund_table.txt", sep="\t",row.names=T)
-swarms_tb<-fread("/home/lrubinat/Documents/2Q16/data/TARA_V9/globaldataset.otu.v20160830")
-swarms_tb_reduced<-swarms_tb[,.SD,.SDcols=colnames(swarms_tb)[!grepl("TV|TA|BV", colnames(swarms_tb))]]
+swarms_tb_reduced<-fread("data_info_table.txt")
 head(swarms_tb_reduced)
 #write.table(data[,.SD,.SDcols=colnames(data)[!grepl("TV|TA|BV",colnames(data))]],"data_info_table.txt",sep="\t",row.names=T)
 #temp<-data[taxogroup=="Prasinophyceae Clade 7"]
@@ -89,12 +88,15 @@ head(swarms_tb_reduced)
 
 ```{r read_SAGs_classification, echo=F, message=F, results="hide"}
 SAGs_classification<-read.table(file="SAGs_complete_IDs.txt", head=TRUE, fill=TRUE)
-swarms_tb_reduced
 SAGs_classification[1:50,]
 ```
 
 
 ```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
+#add swarms taxogroup data
+data_abund$swm_taxogroup = swarms_tb_reduced[match(data_abund$md5sum, swarms_tb_reduced$md5sum), "taxogroup"] 
+data_abund[1:5,]
+
 temp<-data_abund[,sum(value),by=md5sum]
 setkey(temp,md5sum)
 setkey(output,md5sum)
