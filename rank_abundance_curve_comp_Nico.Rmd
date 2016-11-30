@@ -76,11 +76,12 @@ sple<-fread("sple.csv")
 sple<-sple[fraction%in%c("0.8-5","5-20","20-180","180-2000")&depth%in%c("SUR","DCM")&template=="DNA"]
 
 data_abund<-fread("data_abund_table.txt")
-
 #write.table(data_abund, "data_abund_table.txt", sep="\t",row.names=T)
+
 swarms_tb_reduced<-fread("data_info_table.txt")
 head(swarms_tb_reduced)
 #write.table(data[,.SD,.SDcols=colnames(data)[!grepl("TV|TA|BV",colnames(data))]],"data_info_table.txt",sep="\t",row.names=T)
+
 #temp<-data[taxogroup=="Prasinophyceae Clade 7"]
 #rbind.fill.matrix(lapply(strsplit(temp$lineage,"\\|"),function(X) t(as.matrix(X))))
 ```
@@ -94,8 +95,8 @@ SAGs_classification[1:50,]
 
 ```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
 #add swarms taxogroup data
-data_abund$swm_taxogroup = swarms_tb_reduced[match(data_abund$md5sum, swarms_tb_reduced$md5sum), "taxogroup"] 
-data_abund[1:5,]
+#data_abund$swm_taxogroup = swarms_tb_reduced[match(data_abund$md5sum, swarms_tb_reduced$md5sum), "taxogroup"] 
+#data_abund[1:5,]
 
 temp<-data_abund[,sum(value),by=md5sum]
 setkey(temp,md5sum)
@@ -106,7 +107,8 @@ temp[,rank:=1:nrow(temp)]
 temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 temp<-join(temp, SAGs_classification)
-temp[1:12,]
+temp$swm_taxogroup = swarms_tb_reduced[match(temp$md5sum, swarms_tb_reduced$md5sum), "taxogroup"] 
+temp[1:5,]
 
 swarms_groups <- list(
   "no"="no SAG aligned",
@@ -149,7 +151,9 @@ SAGs_lt<-temp[temp$SAG =="yes"]
 SAGs_lt[,'coverage']<-round(SAGs_lt[,'coverage'],3)
 
 #reorder columns
-SAGs_lt_reordered[,c(10,2,3,4,5,6,7,8,11)]
+SAGs_lt<-SAGs_lt[,c(10,2,3,4,5,6,7,8,11)]
+SAGs_lt[1:5,]
+
 
 datatable(head(SAGs_lt_reordered, 872), 
           colnames = c('ident.%' = 3, 'SAG_lth' = 4, 'swm_lth' = 5, 'abund' = 7),
