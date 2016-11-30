@@ -166,11 +166,21 @@ SAGs_lt[1:5,]
 \
 ```{r all_table, echo=F}
 
+SAGs_lt<-as.data.frame(SAGs_lt)
+
 datatable(head(SAGs_lt, 872), 
           colnames = c('ident.%' = 4, 'SAG_lth' = 5, 'swm_lth' = 6, 'abund' = 8),
           filter = list(position = 'top', clear = FALSE, plain = TRUE),
           class = 'cell-border stripe',
           caption = 'Table 1: abundance of all SAGs',
+          
+          #formatStyle(
+          #  'status',
+          #  backgroundColor = styleEqual(
+          #    unique(SAGs_lt$status), c('orange', 'lightgreen', 'lightpink')
+          #  )
+          #),
+          
           options = list(
             
             autowidth = TRUE,
