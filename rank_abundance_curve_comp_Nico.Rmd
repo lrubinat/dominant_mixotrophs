@@ -139,14 +139,30 @@ length(which(temp$SAG == "no")) #92837
 ```{r all_table, echo=F}
 SAGs_lt<-temp[temp$SAG =="yes"]
 
-datatable(SAGs_lt)
+datatable(head(SAGs_lt, 872), options = list(
+  columnDefs = list(list(className = "dt-center", targets=c(1:10))),
+  initComplete = JS(
+  "function(settings, json) {",
+  "$(this.api().table().header()).css({'background-color': '#323232', 'color': '#fff'});",
+  "}"),
+  pageLength = 10,
+  lengthMenu = c(10, 20, 50, 100, 300, 872)
+))
 #SAGs_lt[1:100,]
 #write.table(SAGs_lt, "SAGs_abundance_tb_all.txt", sep="\t")
 ```
 
+
+
+
+
+
+
+
+
 SURFACE - Fraction 0.8-5
 
-```{r fig_piconano, echo=F}
+```{r fig_piconano, echo=F, results="hide"}
 data_abund_SUR<-data_abund[depth=="SUR"]
 temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
 setkey(temp,md5sum)
