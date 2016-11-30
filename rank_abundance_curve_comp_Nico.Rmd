@@ -29,6 +29,7 @@ library(ggplot2)
 library(ggrepel)
 library(plyr)
 library(DT)
+library(shiny)
 ```
 
 
@@ -138,44 +139,54 @@ length(which(temp$SAG == "no")) #92837
 
 ```{r all_table, echo=F}
 SAGs_lt<-temp[temp$SAG =="yes"]
+SAGs_lt[,'coverage']<-round(SAGs_lt[,'coverage'],3)
 
-datatable(head(SAGs_lt, 872), options = list(
-  
-  #data position in columns
-  columnDefs = list(list(
-   # className = "dt-center", targets=c(1:10))),
-  
-  #swarms IDs rendering
-    #list(list(
-      targets = 2,
-      render = JS(
-        "function(data, type, row, meta) {",
-        "return type === 'display' && data.length > 6 ?",
-        "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
-        "}"))),
-
-  #head layout
-  initComplete = JS(
-  "function(settings, json) {",
-  "$(this.api().table().header()).css({'background-color': '#323232', 'color': '#fff'});",
-  "}"),
-  
-
-  pageLength = 10,
-  lengthMenu = c(10, 20, 50, 100, 300, 872)
+datatable(head(SAGs_lt, 872), 
+          colnames = c('ident.%' = 4, 'swm_lth' =  'abund' = 8),
+          filter = list(position = 'top', clear = FALSE, plain = TRUE),
+          class = 'cell-border stripe',
+          caption = 'Table 1: abundance of all SAGs',
+          options = list(
+            
+            autowidth = TRUE,
+            searchHighlight = TRUE,
+            order = (list(list(7, 'desc'), list(6, 'desc'), list(3, 'desc'))),
+            
+            #data position in columns
+            columnDefs = list(list(
+             # className = "dt-center", targets=c(1:10))),
+            
+            #swarms IDs rendering
+              #list(list(
+                targets = 2,
+                render = JS(
+                  "function(data, type, row, meta) {",
+                  "return type === 'display' && data.length > 6 ?",
+                  "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
+                  "}"))),
+          
+            #head layout
+            initComplete = JS(
+            "function(settings, json) {",
+            "$(this.api().table().header()).css({'background-color': '#323232', 'color': '#fff'});",
+            "}"),
+            
+            pageLength = 10,
+            lengthMenu = c(10, 20, 50, 100, 300, 872)
 ))
 #SAGs_lt[1:100,]
 #write.table(SAGs_lt, "SAGs_abundance_tb_all.txt", sep="\t")
+#app = system.file('examples', 'DT-rows', package = 'DT')
+#shiny::runApp(app)
+
+
+
 ```
 
-
-
-
-
-
-
-
-
+\
+\
+\
+\
 SURFACE - Fraction 0.8-5
 
 ```{r fig_piconano, echo=F, results="hide"}

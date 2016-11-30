@@ -10,4 +10,4 @@ fig_micro	~	==	>	:=	$	aes	data_abund	facet_wrap	fraction	geom_point	ggplot	ident
 fig_meso	~	==	>	:=	$	aes	data_abund	facet_wrap	fraction	geom_point	ggplot	identity	ifelse	is.na	length	list	md5sum	nrow	order	output	rank	SAG	sapply	scale_y_log10	setkey	sum	T	V1	value	which
 all_yes_length	==	$	length	temp	which
 all_no_length	==	$	length	temp	which
-all_table	==	$	c	datatable	head	JS	list	temp
+all_table	==	[<-	$	c	datatable	head	JS	list	round	temp
