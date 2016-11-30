@@ -78,6 +78,9 @@ sple<-sple[fraction%in%c("0.8-5","5-20","20-180","180-2000")&depth%in%c("SUR","D
 data_abund<-fread("data_abund_table.txt")
 
 #write.table(data_abund, "data_abund_table.txt", sep="\t",row.names=T)
+swarms_tb<-fread("/home/lrubinat/Documents/2Q16/data/TARA_V9/globaldataset.otu.v20160830")
+swarms_tb_reduced<-swarms_tb[,.SD,.SDcols=colnames(swarms_tb)[!grepl("TV|TA|BV", colnames(swarms_tb))]]
+head(swarms_tb_reduced)
 #write.table(data[,.SD,.SDcols=colnames(data)[!grepl("TV|TA|BV",colnames(data))]],"data_info_table.txt",sep="\t",row.names=T)
 #temp<-data[taxogroup=="Prasinophyceae Clade 7"]
 #rbind.fill.matrix(lapply(strsplit(temp$lineage,"\\|"),function(X) t(as.matrix(X))))
@@ -86,7 +89,7 @@ data_abund<-fread("data_abund_table.txt")
 
 ```{r read_SAGs_classification, echo=F, message=F, results="hide"}
 SAGs_classification<-read.table(file="SAGs_complete_IDs.txt", head=TRUE, fill=TRUE)
-
+swarms_tb_reduced
 SAGs_classification[1:50,]
 ```
 
@@ -139,10 +142,15 @@ length(which(temp$SAG == "no")) #92837
 
 ```{r all_table, echo=F}
 SAGs_lt<-temp[temp$SAG =="yes"]
+
+#round coverage values
 SAGs_lt[,'coverage']<-round(SAGs_lt[,'coverage'],3)
 
-datatable(head(SAGs_lt, 872), 
-          colnames = c('ident.%' = 4, 'swm_lth' =  'abund' = 8),
+#reorder columns
+SAGs_lt_reordered[,c(10,2,3,4,5,6,7,8,11)]
+
+datatable(head(SAGs_lt_reordered, 872), 
+          colnames = c('ident.%' = 3, 'SAG_lth' = 4, 'swm_lth' = 5, 'abund' = 7),
           filter = list(position = 'top', clear = FALSE, plain = TRUE),
           class = 'cell-border stripe',
           caption = 'Table 1: abundance of all SAGs',
@@ -150,7 +158,9 @@ datatable(head(SAGs_lt, 872),
             
             autowidth = TRUE,
             searchHighlight = TRUE,
-            order = (list(list(7, 'desc'), list(6, 'desc'), list(3, 'desc'))),
+            
+            #1rst: abund; 2nd: coverage; 3rd: id%
+            order = (list(list(6, 'desc'), list(7, 'desc'), list(2, 'desc'))),
             
             #data position in columns
             columnDefs = list(list(
@@ -174,6 +184,9 @@ datatable(head(SAGs_lt, 872),
             pageLength = 10,
             lengthMenu = c(10, 20, 50, 100, 300, 872)
 ))
+
+
+
 #SAGs_lt[1:100,]
 #write.table(SAGs_lt, "SAGs_abundance_tb_all.txt", sep="\t")
 #app = system.file('examples', 'DT-rows', package = 'DT')
