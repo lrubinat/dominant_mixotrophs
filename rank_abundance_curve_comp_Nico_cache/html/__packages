@@ -8,3 +8,5 @@ ggrepel
 plyr
 DT
 shiny
+dplyr
+magrittr

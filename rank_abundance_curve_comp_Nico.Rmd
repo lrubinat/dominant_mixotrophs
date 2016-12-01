@@ -28,8 +28,10 @@ library(reshape2)
 library(ggplot2)
 library(ggrepel)
 library(plyr)
-library(DT)
 library(shiny)
+library(DT)
+library(dplyr)
+library(magrittr)
 ```
 
 
@@ -168,18 +170,12 @@ SAGs_lt[1:5,]
 
 SAGs_lt<-as.data.frame(SAGs_lt)
 
+
 datatable(head(SAGs_lt, 872), 
           colnames = c('ident.%' = 4, 'SAG_lth' = 5, 'swm_lth' = 6, 'abund' = 8),
           filter = list(position = 'top', clear = FALSE, plain = TRUE),
           class = 'cell-border stripe',
           caption = 'Table 1: abundance of all SAGs',
-          
-          #formatStyle(
-          #  'status',
-          #  backgroundColor = styleEqual(
-          #    unique(SAGs_lt$status), c('orange', 'lightgreen', 'lightpink')
-          #  )
-          #),
           
           options = list(
             
@@ -211,6 +207,43 @@ datatable(head(SAGs_lt, 872),
             pageLength = 10,
             lengthMenu = c(10, 20, 50, 100, 300, 872)
 ))
+```
+
+```{r second_go, echo=F, cache=T}
+
+#SAGs_lt<-as.data.table(SAGs_lt)
+#head(SAGs_lt)
+#colnames(SAGs_lt)<-c("id_classif", "md5sum","identity","SAG_length","swarm_length","coverage","V1","rank","swm_taxogroup","status")
+
+
+#formatStyle(SAGs_lt,
+#  'status',
+#  backgroundColor = styleEqual(
+#    unique(SAGs_lt$status), c('orange', 'lightgreen', 'lightpink')
+#  )
+#),
+
+
+
+
+#datatable(head(SAGs_lt, 872) %>%
+#          formatStyle(
+#            'status',
+#            backgroundColor = styleEqual(
+#              unique(SAGs_lt$status), c('orange', 'lightgreen', 'lightpink')
+#            )
+#          )
+#)
+
+#renderDataTable({
+#  datatable(SAGs_lt) %>% formatStyle(
+#    'status',
+#    backgroundColor = styleEqual(
+#    unique(SAGs_lt$status), c('orange', 'lightgreen', 'lightpink'))
+#  )
+#})
+
+####### error: $ operator is invalid for atomic vector #########
 
 #SAGs_lt[1:100,]
 #write.table(SAGs_lt, "SAGs_abundance_tb_all.txt", sep="\t")
