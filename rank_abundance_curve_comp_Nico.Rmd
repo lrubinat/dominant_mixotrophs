@@ -98,6 +98,24 @@ SAGs_status<-as.data.frame(SAGs_status)
 SAGs_status[1:5,]
 ```
 
+Composition of green algae swarms:
+
+   3041 Chlorophyceae"
+   1113 Mamiellophyceae"
+    391 Prasinophyceae Clade 7"
+    321 Pyramimonadales"
+    602 Trebouxiophyceae"
+    463 Ulvophyceae"
+    448 other core chlorophytes"
+    155 other prasinophytes"
+     16 ? a blaster"
+   1296 ? undetermined archaeplastida *"
+    166 ? undetermined green algae"
+    492 Streptophyta
+
+
+
+
 
 ```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
 #add swarms taxogroup data
