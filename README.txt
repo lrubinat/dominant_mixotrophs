@@ -23,8 +23,8 @@ SAGs' GLOBAL ABUNDANCE
 	$grep "Streptophyta" data_info_table.txt | awk -F "\t" '{print $3, "\t", $(NF-2)}' >> swarms_taxogroups_green-red.txt
 	$grep "Rhodophyta" data_info_table.txt | awk -F "\t" '{print $3, "\t", $(NF-2)}' >> swarms_taxogroups_green-red.txt
 		
-		--> Input: "data_info_table.txt"
-		--> Output: "swarms_taxogroups_green-red.txt"
+		--> Input: "data_info_table.txt" #474304 rows
+		--> Output: "swarms_taxogroups_green-red.txt" #9250 rows
 	
 
 	#taxogroups occurrence in Chlorophyta
