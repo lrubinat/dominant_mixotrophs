@@ -174,7 +174,7 @@ SAGs_lt<-as.data.frame(SAGs_lt)
 
 datatable(head(SAGs_lt, 872), 
           colnames = c('ident.%' = 4, 'SAG_lth' = 5, 'swm_lth' = 6, 'abund' = 8),
-          filter = list(position = 'top', clear = FALSE, plain = TRUE),
+          filter = list(position = 'top', clear = FALSE, plain = F),
           class = 'cell-border stripe',
           caption = 'Table 1: abundance of all SAGs',
           
