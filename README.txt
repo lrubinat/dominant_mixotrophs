@@ -42,22 +42,24 @@
 		--> Output: "identify_red_green_allgae_all_swarms_output.txt". Composition:
 
 			   - Taxogroups:
-			   	$ grep -v "other" identify_red_green_algae_all_swarms_output.txt | awk -F "\t" '{print $2}' | sort -V | uniq -c | less
+			   	$ grep -v "other$" identify_red_green_algae_all_swarms_output.txt | awk -F "\t" '{print $2}' | sort -V | uniq -c | less
 
 			   [7901 GREEN ALGAE (Chlorophyta & Streptophyta)]
-			   3041  "Chlorophyceae"
-			   1113  "Mamiellophyceae"
-			    391  "Prasinophyceae Clade 7"
-			    321  "Pyramimonadales"
-			    602  "Trebouxiophyceae"
-			    463  "Ulvophyceae"
-			     16  "? a blaster"
-			   1296  "? undetermined archaeplastida *"
-			    166  "? undetermined green algae"
-   			    492  "Streptophyta"
+				   3041  "Chlorophyceae"
+				   1113  "Mamiellophyceae"
+				    391  "Prasinophyceae Clade 7"
+				    321  "Pyramimonadales"
+				    602  "Trebouxiophyceae"
+				    463  "Ulvophyceae"
+				    448  "other core chlorophytes"
+				    155  "other prasinophytes"
+				     16  "? a blaster"
+				   1296  "? undetermined archaeplastida *"
+				    166  "? undetermined green algae"
+   				    492  "Streptophyta"
 
 		   	   	[764 RED ALGAE]
-		   	    746  "Rhodophyta"
+		   	  	  746  "Rhodophyta"
 
 
 		   	  - No. of red and green algae:

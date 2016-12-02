@@ -80,9 +80,10 @@ sple<-sple[fraction%in%c("0.8-5","5-20","20-180","180-2000")&depth%in%c("SUR","D
 data_abund<-fread("data_abund_table.txt")
 #write.table(data_abund, "data_abund_table.txt", sep="\t",row.names=T)
 
-swarms_tb_reduced<-fread("data_info_table.txt")
-head(swarms_tb_reduced)
+swarms_tb_classif<-fread("identify_red_green_algae_all_swarms_output.txt")
+head(swarms_tb_classif)
 #write.table(data[,.SD,.SDcols=colnames(data)[!grepl("TV|TA|BV",colnames(data))]],"data_info_table.txt",sep="\t",row.names=T)
+
 
 #temp<-data[taxogroup=="Prasinophyceae Clade 7"]
 #rbind.fill.matrix(lapply(strsplit(temp$lineage,"\\|"),function(X) t(as.matrix(X))))
@@ -98,28 +99,10 @@ SAGs_status<-as.data.frame(SAGs_status)
 SAGs_status[1:5,]
 ```
 
-Composition of green algae swarms:
-
-   3041 Chlorophyceae"
-   1113 Mamiellophyceae"
-    391 Prasinophyceae Clade 7"
-    321 Pyramimonadales"
-    602 Trebouxiophyceae"
-    463 Ulvophyceae"
-    448 other core chlorophytes"
-    155 other prasinophytes"
-     16 ? a blaster"
-   1296 ? undetermined archaeplastida *"
-    166 ? undetermined green algae"
-    492 Streptophyta
-
-
-
-
 
 ```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
 #add swarms taxogroup data
-#data_abund$swm_taxogroup = swarms_tb_reduced[match(data_abund$md5sum, swarms_tb_reduced$md5sum), "taxogroup"] 
+#data_abund$swm_taxogroup = swarms_tb_classif[match(data_abund$md5sum, swarms_tb_classif$md5sum), "taxogroup"] 
 #data_abund[1:5,]
 
 temp<-data_abund[,sum(value),by=md5sum]
@@ -132,7 +115,7 @@ temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 temp<-join(temp, SAGs_classification)
 temp<-join(temp, SAGs_status)
-temp$swm_taxogroup<-swarms_tb_reduced[match(temp$md5sum, swarms_tb_reduced$md5sum), "taxogroup"] 
+temp<-join(temp,swarms_tb_classif)
 temp[1:50,]
 
 swarms_groups <- list(
@@ -178,7 +161,7 @@ SAGs_lt$id_classif<-as.character(SAGs_lt$id_classif)
 SAGs_lt[,'coverage']<-round(SAGs_lt[,'coverage'],3)
 
 #reorder columns
-SAGs_lt<-SAGs_lt[,c(10,2,3,4,5,6,7,8,12,11)]
+SAGs_lt<-SAGs_lt[,c(10,2,3,4,5,6,7,8,12,13,11)]
 SAGs_lt[1:5,]
 ```
 \
