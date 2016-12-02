@@ -99,6 +99,7 @@ SAGs_status<-as.data.frame(SAGs_status)
 SAGs_status[1:5,]
 ```
 
+## 1.1) Swarms of all size fractions - Surface + DCM
 
 ```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
 #add swarms taxogroup data
@@ -135,7 +136,7 @@ ggplot(temp,aes(x=rank,y=V1))+
                     breaks=c("no", "yes"),
                     labels=c("no SAG aligned", "SAG(s) aligned"))+
   #theme(legend.position="bottom")+
-  labs(title="[Fig. 1] All swarms")
+  labs(title="[Fig. 1] All size fractions - SRF + DCM")
 
 ggsave("SAGs_abund_fig_all.png",height=6.75,width=9)
 ```
@@ -210,6 +211,7 @@ datatable(head(SAGs_lt, 872),
 ))
 ```
 
+
 ```{r second_go, echo=F, cache=T}
 
 #SAGs_lt<-as.data.table(SAGs_lt)
@@ -252,14 +254,9 @@ datatable(head(SAGs_lt, 872),
 #shiny::runApp(app)
 ```
 
-\
-\
-\
-\
+## 1.2) Piconanoplankton - Surface
 
-SURFACE - Fraction 0.8-5
-
-```{r fig_piconano, echo=F, results="hide"}
+```{r fig_piconano_srf, echo=F, results="hide", message=F, warning=F}
 data_abund_SUR<-data_abund[depth=="SUR"]
 temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
 setkey(temp,md5sum)
@@ -270,110 +267,216 @@ temp[,rank:=1:nrow(temp)]
 temp<-temp[V1>10]
 temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
 temp<-join(temp, SAGs_classification)
+temp<-join(temp, SAGs_status)
+temp<-join(temp,swarms_tb_classif)
+temp[1:12,]
+
+
+ggplot(temp,aes(x=rank,y=V1))+
+  geom_point(aes(colour=SAG))+
+  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+  scale_y_log10(name="abundance")+
+  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+  scale_colour_discrete(name="swarms",
+                    breaks=c("no", "yes"),
+                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+  #theme(legend.position="bottom")+
+  labs(title="[Fig. 2] Piconanoplankton - Surface")
+
+
+ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
+```
+
+```{r ggplot - repel, echo=F, results="hide", cache=F}
+
+#ggplot(temp,aes(x=rank,y=V1))+
+#  geom_point(aes(colour=SAG))+
+#  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+#  scale_y_log10()+
+#  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
+#  scale_colour_discrete(name="swarms",
+#                    breaks=c("no", "yes"),
+#                    labels=c("no SAG aligned", "SAG(s) aligned"))+
+#  theme(legend.position="bottom")
+#  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>900000), aes(x=rank,y=V1,label=id_classif), size=2.5, force=2)
+#
+#ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
+# size=2, force=3, box.padding = unit(0.1,"lines"), point.padding = unit(0.02, "lines"))
+
+#ggplot(data=subset(temp, temp$SAG=="yes" & temp$V1>100000),aes(x=rank,y=V1))+
+#  geom_point(aes(colour=SAG))+
+#  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
+#  scale_y_log10()+
+#  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>500000), aes(x=rank,y=V1,label=id_classif), size=2.5)
+```
+
+No. of swarms with SAG(s) aligned:
+
+```{r piconano_srf_yes_length, echo=F}
+length(which(temp$SAG == "yes")) #872
+```
+
+No. of swarms with no SAG aligned:
+
+```{r piconano_srf_no_length, echo=F}
+length(which(temp$SAG == "no")) #92837
+```
+
+```{r piconano_srf_table_dataset, echo=F, results="hide"}
+SAGs_lt<-temp[temp$SAG =="yes"]
+
+SAGs_lt$id_classif<-as.character(SAGs_lt$id_classif)
+
+#round coverage values
+SAGs_lt[,'coverage']<-round(SAGs_lt[,'coverage'],3)
+
+#reorder columns
+SAGs_lt<-SAGs_lt[,c(10,2,3,4,5,6,7,8,12,13,11)]
+SAGs_lt[1:5,]
+```
+
+\
+\
+\
+
+```{r piconano_srf_table, echo=F}
+
+SAGs_lt<-as.data.frame(SAGs_lt)
+
+
+datatable(head(SAGs_lt, 817), 
+          colnames = c('ident.%' = 4, 'SAG_lth' = 5, 'swm_lth' = 6, 'abund' = 8),
+          filter = list(position = 'top', clear = FALSE, plain = F),
+          class = 'cell-border stripe',
+          caption = 'Table 1: abundance of piconanoplankton swarms in surface samples',
+          
+          options = list(
+            
+            autowidth = TRUE,
+            searchHighlight = TRUE,
+            
+            #1rst: abund; 2nd: coverage; 3rd: id%
+            order = (list(list(7, 'desc'), list(6, 'desc'), list(3, 'desc'))),
+            
+            #data position in columns
+            columnDefs = list(list(
+             # className = "dt-center", targets=c(1:10))),
+            
+            #swarms IDs rendering
+              #list(list(
+                targets = 2,
+                render = JS(
+                  "function(data, type, row, meta) {",
+                  "return type === 'display' && data.length > 6 ?",
+                  "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
+                  "}"))),
+          
+            #head layout
+            initComplete = JS(
+            "function(settings, json) {",
+            "$(this.api().table().header()).css({'background-color': '#323232', 'color': '#fff'});",
+            "}"),
+            
+            pageLength = 10,
+            lengthMenu = c(10, 20, 50, 100, 300, 872)
+))
+```
+
+
+## 1.3) Piconanoplankton - DCM
+
+```{r fig_piconano_dcm, echo=F, results="hide", message=F, warning=F}
+data_abund_SUR<-data_abund[depth=="DCM"]
+temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
+setkey(temp,md5sum)
+setkey(output,md5sum)
+temp<-output[temp,allow.cartesian=T]
+temp<-temp[order(V1,decreasing = T)]
+temp[,rank:=1:nrow(temp)]
+temp<-temp[V1>10]
+temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
+temp<-join(temp, SAGs_classification)
+temp<-join(temp, SAGs_status)
+temp<-join(temp,swarms_tb_classif)
 temp[1:12,]
 
 ggplot(temp,aes(x=rank,y=V1))+
   geom_point(aes(colour=SAG))+
   scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
-  scale_y_log10()+
+  scale_y_log10(name="abundance")+
   facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
   scale_colour_discrete(name="swarms",
                     breaks=c("no", "yes"),
                     labels=c("no SAG aligned", "SAG(s) aligned"))+
-  theme(legend.position="bottom")
-  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>900000), aes(x=rank,y=V1,label=id_classif), size=2.5, force=2)
-
-ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
-
-
-ggplot(temp,aes(x=rank,y=V1))+
-  geom_point(aes(colour=SAG))+
-  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
-  scale_y_log10()+
-  facet_wrap(~SAG,ncol=2, labeller = swarms_labeller)+
-  scale_colour_discrete(name="swarms",
-                    breaks=c("no", "yes"),
-                    labels=c("no SAG aligned", "SAG(s) aligned"))+
-  theme(legend.position="bottom")
- 
-ggsave("SAGs_abundance_fig_piconano_SRF_lab.png",height=6.75,width=9)
-
-
-  
-# size=2, force=3, box.padding = unit(0.1,"lines"), point.padding = unit(0.02, "lines"))
-
-ggplot(data=subset(temp, temp$SAG=="yes" & temp$V1>100000),aes(x=rank,y=V1))+
-  geom_point(aes(colour=SAG))+
-  scale_x_continuous(limits=c(0,45000), breaks = c(0,20000,40000))+
-  scale_y_log10()+
-  geom_text_repel(data = subset(temp, temp$SAG=="yes" & temp$V1>500000), aes(x=rank,y=V1,label=id_classif), size=2.5)
-
-length(which(temp$SAG == "yes")) #817
-length(which(temp$SAG == "no")) #38465
-
-SAGs_lt<-temp[temp$SAG =="yes"]
-SAGs_lt[1:50,]
+  #theme(legend.position="bottom")+
+  labs(title="[Fig. 3] Piconanoplankton - DCM")
 ```
 
-Fraction 5-20um
+No. of swarms with SAG(s) aligned:
 
-```{r fig_nano, echo=F}
-temp<-data_abund[fraction=="5-20",sum(value),by=list(md5sum,fraction)]
-setkey(temp,md5sum)
-setkey(output,md5sum)
-temp<-output[temp,allow.cartesian=T]
-temp<-temp[order(V1,decreasing = T)]
-temp[,rank:=1:nrow(temp)]
-temp<-temp[V1>10]
-temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
-
-ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
-
-length(which(temp$SAG == "yes")) #681
-length(which(temp$SAG == "no")) #28134
-
-SAGs_lt<-temp[temp$SAG =="yes"]
-SAGs_lt[1:50,]
+```{r piconano_dcm_yes_length, echo=F}
+length(which(temp$SAG == "yes")) #872
 ```
 
-Fraction 20-180um
+No. of swarms with no SAG aligned:
 
-```{r fig_micro, echo=F}
-temp<-data_abund[fraction=="20-180",sum(value),by=list(md5sum,fraction)]
-setkey(temp,md5sum)
-setkey(output,md5sum)
-temp<-output[temp,allow.cartesian=T]
-temp<-temp[order(V1,decreasing = T)]
-temp[,rank:=1:nrow(temp)]
-temp<-temp[V1>10]
-temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
-
-ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
-
-length(which(temp$SAG == "yes")) #678
-length(which(temp$SAG == "no")) #24988
-
-SAGs_lt<-temp[temp$SAG =="yes"]
-SAGs_lt[1:50,]
+```{r piconano_dcm_no_length, echo=F}
+length(which(temp$SAG == "no")) #92837
 ```
 
-Fraction 180-2000um
-
-```{r fig_meso, echo=F}
-temp<-data_abund[fraction=="180-2000",sum(value),by=list(md5sum,fraction)]
-setkey(temp,md5sum)
-setkey(output,md5sum)
-temp<-output[temp,allow.cartesian=T]
-temp<-temp[order(V1,decreasing = T)]
-temp[,rank:=1:nrow(temp)]
-temp<-temp[V1>10]
-temp[,SAG:=sapply(identity,function(X) ifelse(is.na(X),"no","yes"))]
-
-ggplot(temp,aes(x=rank,y=V1))+geom_point(aes(colour=SAG))+scale_y_log10()+facet_wrap(~SAG,ncol=2)
-
-length(which(temp$SAG == "yes")) #683
-length(which(temp$SAG == "no")) #24775
-
+```{r piconano_dcm_table_dataset, echo=F, results="hide"}
 SAGs_lt<-temp[temp$SAG =="yes"]
-SAGs_lt[1:50,]
+
+SAGs_lt$id_classif<-as.character(SAGs_lt$id_classif)
+
+#round coverage values
+SAGs_lt[,'coverage']<-round(SAGs_lt[,'coverage'],3)
+
+#reorder columns
+SAGs_lt<-SAGs_lt[,c(10,2,3,4,5,6,7,8,12,13,11)]
+SAGs_lt[1:5,]
+```
+\
+\
+\
+```{r piconano_dcm_table, echo=F}
+
+SAGs_lt<-as.data.frame(SAGs_lt)
+
+datatable(head(SAGs_lt, 698), 
+          colnames = c('ident.%' = 4, 'SAG_lth' = 5, 'swm_lth' = 6, 'abund' = 8),
+          filter = list(position = 'top', clear = FALSE, plain = F),
+          class = 'cell-border stripe',
+          caption = 'Table 1: abundance of all SAGs',
+          
+          options = list(
+            
+            autowidth = TRUE,
+            searchHighlight = TRUE,
+            
+            #1rst: abund; 2nd: coverage; 3rd: id%
+            order = (list(list(7, 'desc'), list(6, 'desc'), list(3, 'desc'))),
+            
+            #data position in columns
+            columnDefs = list(list(
+             # className = "dt-center", targets=c(1:10))),
+            
+            #swarms IDs rendering
+              #list(list(
+                targets = 2,
+                render = JS(
+                  "function(data, type, row, meta) {",
+                  "return type === 'display' && data.length > 6 ?",
+                  "'<span title=\"' + data + '\">' + data.substr(0, 6) + '...</span>' : data;",
+                  "}"))),
+          
+            #head layout
+            initComplete = JS(
+            "function(settings, json) {",
+            "$(this.api().table().header()).css({'background-color': '#323232', 'color': '#fff'});",
+            "}"),
+            
+            pageLength = 10,
+            lengthMenu = c(10, 20, 50, 100, 300, 872)
+))
 ```
