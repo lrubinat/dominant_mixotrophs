@@ -394,7 +394,7 @@ datatable(head(SAGs_lt, 817),
             "}"),
             
             pageLength = 10,
-            lengthMenu = c(10, 20, 50, 100, 300, 872)
+            lengthMenu = c(10, 20, 50, 100, 300, 817)
 ))
 ```
 
