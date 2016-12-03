@@ -9,10 +9,6 @@ all_no_length	==	$	length	temp	which
 all_table_dataset	==	[<-	$	$<-	as.character	c	round	temp
 all_table	as.data.frame	c	datatable	F	head	JS	list
 second_go	
-fig_piconano	~	==	>	:=	$	&	aes	c	data_abund	depth	facet_wrap	fraction	geom_point	geom_text_repel	ggplot	ggsave	id_classif	identity	ifelse	is.na	join	length	list	md5sum	nrow	order	output	rank	SAG	SAGs_classification	sapply	scale_colour_discrete	scale_x_continuous	scale_y_log10	setkey	subset	sum	swarms_labeller	T	theme	V1	value	which
-fig_nano	~	==	>	:=	$	aes	data_abund	facet_wrap	fraction	geom_point	ggplot	identity	ifelse	is.na	length	list	md5sum	nrow	order	output	rank	SAG	sapply	scale_y_log10	setkey	sum	T	V1	value	which
-fig_micro	~	==	>	:=	$	aes	data_abund	facet_wrap	fraction	geom_point	ggplot	identity	ifelse	is.na	length	list	md5sum	nrow	order	output	rank	SAG	sapply	scale_y_log10	setkey	sum	T	V1	value	which
-fig_meso	~	==	>	:=	$	aes	data_abund	facet_wrap	fraction	geom_point	ggplot	identity	ifelse	is.na	length	list	md5sum	nrow	order	output	rank	SAG	sapply	scale_y_log10	setkey	sum	T	V1	value	which
 fig_piconano_srf	~	==	>	:=	aes	c	data_abund	depth	facet_wrap	fraction	geom_point	ggplot	ggsave	identity	ifelse	is.na	join	labs	list	md5sum	nrow	order	output	rank	SAG	SAGs_classification	SAGs_status	sapply	scale_colour_discrete	scale_x_continuous	scale_y_log10	setkey	sum	swarms_labeller	swarms_tb_classif	T	V1	value
 piconano_srf_yes_length	==	$	length	temp	which
 piconano_srf_no_length	==	$	length	temp	which

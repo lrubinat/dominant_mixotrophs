@@ -99,7 +99,15 @@ SAGs_status<-as.data.frame(SAGs_status)
 SAGs_status[1:5,]
 ```
 
+\
+\
+\
+\
+
+
 ## 1.1) Swarms of all size fractions - Surface + DCM
+\
+\
 
 ```{r fig_all, echo=F, include=T, results="hide", message=F, warning=F, fig.align="center"}
 #add swarms taxogroup data
@@ -254,11 +262,19 @@ datatable(head(SAGs_lt, 872),
 #shiny::runApp(app)
 ```
 
-## 1.2) Piconanoplankton - Surface
+\
+\
+\
+\
 
-```{r fig_piconano_srf, echo=F, results="hide", message=F, warning=F}
+
+## 1.2) Piconanoplankton - Surface
+\
+\
+
+```{r fig_piconano_srf, echo=F, results="hide", message=F, warning=F, fig.align="center"}
 data_abund_SUR<-data_abund[depth=="SUR"]
-temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
+temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum)]
 setkey(temp,md5sum)
 setkey(output,md5sum)
 temp<-output[temp,allow.cartesian=T]
@@ -382,12 +398,19 @@ datatable(head(SAGs_lt, 817),
 ))
 ```
 
+\
+\
+\
+\
+
 
 ## 1.3) Piconanoplankton - DCM
+\
+\
 
-```{r fig_piconano_dcm, echo=F, results="hide", message=F, warning=F}
+```{r fig_piconano_dcm, echo=F, results="hide", message=F, warning=F, fig.align="center"}
 data_abund_SUR<-data_abund[depth=="DCM"]
-temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum,fraction)]
+temp<-data_abund_SUR[fraction=="0.8-5",sum(value),by=list(md5sum)]
 setkey(temp,md5sum)
 setkey(output,md5sum)
 temp<-output[temp,allow.cartesian=T]
@@ -477,6 +500,6 @@ datatable(head(SAGs_lt, 698),
             "}"),
             
             pageLength = 10,
-            lengthMenu = c(10, 20, 50, 100, 300, 872)
+            lengthMenu = c(10, 20, 50, 100, 300, 698)
 ))
 ```

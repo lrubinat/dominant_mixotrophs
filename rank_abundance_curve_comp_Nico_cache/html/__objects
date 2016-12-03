@@ -9,10 +9,6 @@ all_no_length
 all_table_dataset	SAGs_lt
 all_table	SAGs_lt	.rank_abundance_curve_comp_Nico_cache/html/all_table_3dde3d2f5c72e0cbdffa2395638e8ac6_meta
 second_go	
-fig_piconano	data_abund_SUR	SAGs_lt	temp
-fig_nano	SAGs_lt	temp
-fig_micro	SAGs_lt	temp
-fig_meso	SAGs_lt	temp
 fig_piconano_srf	data_abund_SUR	temp
 piconano_srf_yes_length	
 piconano_srf_no_length	
@@ -22,4 +18,4 @@ fig_piconano_dcm	data_abund_SUR	temp
 piconano_dcm_yes_length	
 piconano_dcm_no_length	
 piconano_dcm_table_dataset	SAGs_lt
-piconano_dcm_table	SAGs_lt	.rank_abundance_curve_comp_Nico_cache/html/piconano_dcm_table_43ff09b59bf05bcc59da6064764491c6_meta
+piconano_dcm_table	SAGs_lt	.rank_abundance_curve_comp_Nico_cache/html/piconano_dcm_table_b29346e3b39934cf07a228d889d3987b_meta
